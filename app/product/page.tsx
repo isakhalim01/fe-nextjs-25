@@ -1,12 +1,11 @@
-import Image from "next/image";
 import Layout from "@/components/ui/Layout";
 
-export default function Home() {
+export default function Page() {
   return (
     <Layout>
       <h1 className="text-black">
-        Home
+        Product
       </h1>
     </Layout>
-  );
+  )
 }
