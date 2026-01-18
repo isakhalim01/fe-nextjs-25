@@ -1,0 +1,154 @@
+"use client";
+
+import Layout from "@/components/ui/Layout";
+import { service, serviceShow, serviceUpdate } from "@/services/services";
+import { Button, TextField, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+
+export default function Page() {
+    const params = useParams();
+    const router = useRouter();
+    const id = params.id as string;
+
+    const [categories, setCategories] = useState<any[]>([]);
+    const [form, setForm] = useState({
+        name: "",
+        code: "",
+        price: "",
+        description: "",
+        product_category_id: "",
+    });
+
+    const getData = async () => {
+        // Fetch product data
+        const productResponse = await serviceShow("products", id);
+        if (!productResponse.error) {
+            const data = productResponse.data;
+            setForm({
+                name: data.name,
+                code: data.code,
+                price: data.price,
+                description: data.description || "",
+                product_category_id: data.product_category_id || "",
+            });
+        }
+
+        // Fetch categories
+        const categoryResponse = await service("category-products");
+        if (!categoryResponse.error) {
+            setCategories(categoryResponse.data);
+        }
+    };
+
+    useEffect(() => {
+        if (id) {
+            getData();
+        }
+    }, [id]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+        setForm({
+            ...form,
+            [e.target.name as string]: e.target.value,
+        });
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Send as simple JSON object
+        const payload = {
+            name: form.name,
+            code: form.code,
+            price: form.price,
+            description: form.description,
+            product_category_id: form.product_category_id
+        };
+
+        const response = await serviceUpdate("products", payload, id);
+
+        if (!response.error) {
+            alert("Product updated successfully");
+            router.push("/product");
+        } else {
+            alert("Failed to update product");
+        }
+    };
+
+    return (
+        <Layout>
+            <div className="mb-4">
+                <h1 className="text-xl font-bold text-black">Edit Product</h1>
+            </div>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-lg">
+                <TextField
+                    label="Product Name"
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    required
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                    label="Code"
+                    name="code"
+                    value={form.code}
+                    onChange={handleChange}
+                    required
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                    label="Price"
+                    name="price"
+                    type="number"
+                    value={form.price}
+                    onChange={handleChange}
+                    required
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                />
+                <FormControl fullWidth required>
+                    <InputLabel shrink>Category</InputLabel>
+                    <Select
+                        name="product_category_id"
+                        value={form.product_category_id}
+                        label="Category"
+                        onChange={(e) => handleChange(e as any)}
+                        displayEmpty
+                    >
+                        {categories.map((cat) => (
+                            <MenuItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                <TextField
+                    label="Description"
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    fullWidth
+                    multiline
+                    rows={4}
+                    InputLabelProps={{ shrink: true }}
+                />
+                <div className="flex gap-2">
+                    <Button type="submit" variant="contained" color="primary">
+                        Update
+                    </Button>
+                    <Link href="/product">
+                        <Button variant="outlined" color="secondary">
+                            Cancel
+                        </Button>
+                    </Link>
+                </div>
+            </form>
+        </Layout>
+    );
+}

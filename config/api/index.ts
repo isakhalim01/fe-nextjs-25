@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import Cookies from 'js-cookie';
 interface CallAPIProps extends AxiosRequestConfig {
-  data?: FormData;
+  data?: any;
   token?: boolean;
   serverToken?: string;
   contentType?: string;
@@ -36,14 +36,15 @@ export default async function callAPI({
     headers: {
       ...headers,
       'Content-Type': contentType ? contentType : 'application/json',
+      'Accept': 'application/json',
     },
   }).catch((err) => err.response);
 
   if (response.status > 300) {
     const res = {
       error: true,
-      message: response.data.message,
-      data: null,
+      message: response.data.message || 'Something went wrong',
+      data: response.data.errors || null,
     };
     return res;
   }

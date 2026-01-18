@@ -16,7 +16,7 @@ export async function service(params: string, serverToken?: string) {
 
 export async function serviceStore(
   params: string,
-  data: FormData,
+  data: any,
   method: 'POST' | 'PUT' = 'POST'
 ) {
   const url = `${ROOT_API}/${API_VERSION}/${params}`;
@@ -56,7 +56,7 @@ export async function serviceEdit(params: string, id: string, token: string) {
 
 export async function serviceUpdate(
   params: string,
-  data: FormData,
+  data: any,
   id: string | number | number[]
 ) {
   const url = `${ROOT_API}/${API_VERSION}/${params}/${id}`;
